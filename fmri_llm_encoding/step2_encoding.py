@@ -12,10 +12,10 @@ from sklearn.model_selection import KFold
 from scipy.stats import pearsonr
 import warnings
 
-# 忽略不重要的警告
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-# === ⚙️ 配置 ===
+# === 配置 ===
 BASE_DIR = "/root/autodl-tmp/project_data"
 FMRI_DIR = os.path.join(BASE_DIR, "fmri")
 TEXTGRID_DIR = os.path.join(BASE_DIR, "textgrid")
@@ -23,12 +23,12 @@ RESULTS_DIR = os.path.join(BASE_DIR, "results_final_v2")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 TR = 2.0
-# ⬇️ 关键参数：PCA=15 防止过拟合，Delay 范围扩大
+# PCA=15 防止过拟合，Delay 范围扩大
 PCA_N = 15 
 CANDIDATE_DELAYS = [4.0, 6.0, 8.0, 10.0] 
 RUN_IDS = [15, 16, 17, 18, 19, 20, 21, 22, 23]
 
-# === 🛠️ 辅助函数 ===
+# === 辅助函数 ===
 def get_sentence_intervals(tg_path):
     try:
         tg = parselmouth.read(tg_path)
@@ -80,9 +80,9 @@ def remove_confound(X, confounds):
     reg = LinearRegression().fit(confounds, X)
     return X - reg.predict(confounds)
 
-# === ▶️ 分析核心 (Cross-Validation) ===
+# === 分析核心 (Cross-Validation) ===
 def analyze(name, feat_folder_name):
-    print(f"\n🚀 Analysis: {name} (5-Fold CV + PCA{PCA_N} + VoxelSelect)", flush=True)
+    print(f"\n Analysis: {name} (5-Fold CV + PCA{PCA_N} + VoxelSelect)", flush=True)
     feat_base = os.path.join(BASE_DIR, feat_folder_name)
     results = {}
     
@@ -122,7 +122,7 @@ def analyze(name, feat_folder_name):
             X_p = X_probe[:n_min]
             Y_p = Y_probe[:n_min]
             
-            # 快速验证 Delay
+            # 快速验证
             split = int(n_min * 0.8)
             pca = PCA(n_components=10) 
             
@@ -135,7 +135,7 @@ def analyze(name, feat_folder_name):
                 Y_te = Y_p[split:]
                 corrs = []
                 for v in range(preds.shape[1]):
-                    # 🛡️ 防御性编程：消除 ConstantInputWarning
+                    # 消除 ConstantInputWarning
                     if np.std(preds[:,v]) > 1e-9 and np.std(Y_te[:,v]) > 1e-9:
                         r = pearsonr(preds[:, v], Y_te[:, v])[0]
                         if not np.isnan(r): corrs.append(r)
@@ -160,8 +160,8 @@ def analyze(name, feat_folder_name):
         durations = durations[:n_final]
         
         # === Step 3: Voxel Selection (基于全数据L16) ===
-        # ⚠️ 注意：这里使用全数据筛选体素是常见的做法 (ROI definition)，
-        # 虽然有轻微的数据泄露风险，但比起在每个Fold里变动ROI，这样更稳定且便于解释。
+        # 使用全数据筛选体素 (ROI definition)，
+        # 比起在每个Fold里变动ROI，这样更稳定且便于解释
         X_sel = X_raw[:, mid_layer, :]
         pca_sel = PCA(n_components=min(10, n_final-1))
         X_sel_clean = remove_confound(pca_sel.fit_transform(X_sel), durations)
@@ -216,7 +216,7 @@ def analyze(name, feat_folder_name):
                         r = pearsonr(preds[:, v], Y_test[:, v])[0]
                         if not np.isnan(r): corrs.append(r)
                 
-                # 记录该 Fold 的表现 (取平均，不再取Top，因为已经是ROI了)
+                # 记录该 Fold 的表现
                 if corrs:
                     fold_scores.append(np.mean(corrs))
                 else:
@@ -234,9 +234,8 @@ def analyze(name, feat_folder_name):
         print(f"   (Auto-saved progress after Run {run})")
 
 if __name__ == "__main__":
-    # ⚠️ 必须确保 embeddings_base 存在 (即 Step 1 Mean Pooling 版)
     if os.path.exists(os.path.join(BASE_DIR, "embeddings_base")):
         analyze("Base", "embeddings_base")
         analyze("Instruct", "embeddings_instruct")
     else:
-        print("❌ 请先运行 step1_extract_mean.py 生成 embeddings_base！")
+        print("please run step1_extract_mean.py to generate embeddings_base！")
