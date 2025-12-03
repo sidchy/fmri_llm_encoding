@@ -6,17 +6,17 @@ import parselmouth
 from parselmouth.praat import call
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# === ⚙️ 配置 ===
+# ===  配置 ===
 BASE_DIR = "/root/autodl-tmp/project_data"
 TEXTGRID_DIR = os.path.join(BASE_DIR, "textgrid")
-# ⚠️ 注意：这里输出到 embeddings_base (Mean Pooling 版)
+#  输出到 embeddings_base (Mean Pooling)
 MODEL_PATHS = {
     "Base": "/root/autodl-tmp/models/LLM-Research/Meta-Llama-3.1-8B",
     "Instruct": "/root/autodl-tmp/models_instruct/LLM-Research/Meta-Llama-3.1-8B-Instruct"
 }
 TOKEN_BEGIN = "Ġ"
 
-# === 🛠️ 辅助函数 ===
+# ===  辅助函数 ===
 def parse_textgrid(tg_path):
     try:
         tg = parselmouth.read(tg_path)
@@ -53,7 +53,7 @@ def token_groups_robust(words, tokens):
     if id_buf: groups.append(id_buf)
     return groups
 
-# === 🧠 提取器 (Mean Pooling Mode) ===
+# === 提取器 (Mean Pooling Mode) ===
 class Extractor:
     def __init__(self, path):
         print(f"Loading {os.path.basename(path)}...", flush=True)
@@ -126,7 +126,7 @@ def run(key):
             if res is not None:
                 np.save(os.path.join(out, f"{fname}_sent{i}.npy"), res)
                 cnt += 1
-    print(f"✅ {key} Done: {cnt} sentences.")
+    print(f" {key} Done: {cnt} sentences.")
 
 if __name__ == "__main__":
     run("Base")
