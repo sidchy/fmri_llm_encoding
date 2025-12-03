@@ -1,4 +1,4 @@
-# 🧠 Brain-Llama3.1-Encoding: A Preliminary Replication
+# Brain-Llama3.1-Encoding: A Preliminary Replication
 
 > **Base Paper:** Gao, C., Ma, Z., Chen, J. et al. Increasing alignment of large language models with language processing in the human brain.Nat Comput Sci 5, 1080–1090 (2025). https://doi.org/10.1038/s43588-025-00863-0
 
